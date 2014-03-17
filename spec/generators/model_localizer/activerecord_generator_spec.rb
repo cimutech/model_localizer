@@ -23,6 +23,12 @@ describe ModelLocalizer::Generators::ModelLocalizerGenerator, :if => ENV['ADAPTE
       run_generator
     }
 
+    describe 'config/initializers/model_localizer.rb' do
+      subject { file('config/initializers/model_localizer.rb') }
+
+      it { should exist }
+    end
+
     describe 'app/models/localizer.rb' do
       subject { file('app/models/localizer.rb') }
       it { should exist }

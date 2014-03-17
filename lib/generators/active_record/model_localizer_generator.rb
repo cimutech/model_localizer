@@ -27,6 +27,12 @@ module ActiveRecord
   belongs_to :localizable, :polymorphic => true
 RUBY
       end
+
+      def show_readme
+        if behavior == :invoke
+          readme "README"
+        end
+      end
     end
   end
 end
