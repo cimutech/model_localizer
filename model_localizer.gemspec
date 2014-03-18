@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["chenqh@cimutech.com"]
   spec.summary       = %q{localizer for model attributes}
   spec.description   = %q{localizer for model attributes}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/leopoldchen/model_localizer"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
