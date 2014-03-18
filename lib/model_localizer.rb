@@ -58,11 +58,11 @@ module ModelLocalizer
       end
 
       ModelLocalizer.locales.each do |locale|
-        func_tail = locale.to_s.sub('-', '_').downcase!
+        func_tail = locale.to_s.sub('-', '_').downcase
         define_method "#{attr_s}_#{func_tail}" do
           send("get_#{attr_s}", locale)
         end
-        define_method "#{attr_s}_#{locale.to_s}=" do |*params|
+        define_method "#{attr_s}_#{func_tail}=" do |*params|
           unless params.length == 1
             raise ArgumentError.new("wrong number of arguments (#{params.length} for 1)")
           end
