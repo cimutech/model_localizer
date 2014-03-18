@@ -4,7 +4,7 @@ ActiveRecord::Schema.define do
   [ :localizers, :translations ].each do |table|
     create_table(table) do |t|
       t.references :localizable, :polymorphic => true
-      t.string :collum_name
+      t.string :column_name
       t.string :locale
       t.string :value
 

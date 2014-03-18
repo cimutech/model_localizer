@@ -20,7 +20,7 @@ module ModelLocalizer
       attr_s = attribute.to_s
       attrs_s = ActiveSupport::Inflector.pluralize(attr_s)
 
-      has_many "#{attrs_s}".to_sym, {conditions: {collum_name: attrs_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true}
+      has_many "#{attrs_s}".to_sym, {conditions: {column_name: attrs_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true}
 
       define_method "set_#{attr_s}" do |*params|
         unless (1..2).include? params.length
@@ -28,8 +28,8 @@ module ModelLocalizer
         end
         value = params[0]
         locale = params[1] || I18n.default_locale.to_s
-        localized_value = send("#{attrs_s}").where(collum_name: attr_s, locale: locale.to_s).first
-        localized_value ||= send("#{attrs_s}").build(collum_name: attr_s, locale: locale.to_s)
+        localized_value = send("#{attrs_s}").where(column_name: attr_s, locale: locale.to_s).first
+        localized_value ||= send("#{attrs_s}").build(column_name: attr_s, locale: locale.to_s)
         localized_value.value = value
         localized_value.save
       end
@@ -41,7 +41,7 @@ module ModelLocalizer
 
         locale = params[0] || I18n.default_locale.to_s
 
-        localized_value = localizer_class.where(localizable_id: self.id, localizable_type: self.class.name, collum_name: attr_s, locale: locale.to_s).first
+        localized_value = localizer_class.where(localizable_id: self.id, localizable_type: self.class.name, column_name: attr_s, locale: locale.to_s).first
         return localized_value.value unless localized_value.nil?
         send("get_#{attr_s}") if localized_value.nil? and locale.to_s != I18n.default_locale.to_s
       end
