@@ -10,7 +10,7 @@ module ModelLocalizer
 
     if attributes.last.is_a?(Hash)
       options = attributes.pop()
-      localizer_class_name = options[:class_name] if options and options.has_key? :class_name
+      localizer_class_name = options[:localizer] if options and options.has_key? :localizer
     end
 
     localizer_table_name = localizer_class_name.tableize.gsub(/\//, "_")
@@ -20,7 +20,7 @@ module ModelLocalizer
       attr_s = attribute.to_s
       attrs_s = ActiveSupport::Inflector.pluralize(attr_s)
 
-      has_many "#{attrs_s}".to_sym, {conditions: {column_name: attrs_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true}
+      has_many "#{attrs_s}".to_sym, {conditions: {column_name: attr_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true}
 
       define_method "set_#{attr_s}" do |*params|
         unless (1..2).include? params.length
@@ -58,7 +58,8 @@ module ModelLocalizer
       end
 
       ModelLocalizer.locales.each do |locale|
-        define_method "#{attr_s}_#{locale.to_s}" do
+        func_tail = locale.to_s.sub('-', '_').downcase!
+        define_method "#{attr_s}_#{func_tail}" do
           send("get_#{attr_s}", locale)
         end
         define_method "#{attr_s}_#{locale.to_s}=" do |*params|

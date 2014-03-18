@@ -19,9 +19,9 @@ class User < ActiveRecord::Base
 end
 
 class Customer < ActiveRecord::Base
-  localize :name, {class_name: "Translation"}
+  localize :name, {localizer: "Translation"}
 end
 
 class Task < ActiveRecord::Base
-  localize :title, :description, {class_name: "Translation"}
+  localize :title, :description, {localizer: "Translation"}
 end
