@@ -20,7 +20,7 @@ module ModelLocalizer
       attr_s = attribute.to_s
       attrs_s = ActiveSupport::Inflector.pluralize(attr_s)
 
-      has_many "#{attrs_s}".to_sym, -> {where collum_name: attrs_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true
+      has_many "#{attrs_s}".to_sym, {conditions: {collum_name: attrs_s}, as: :localizable, class_name: localizer_class_name, dependent: :destroy, autosave: true}
 
       define_method "set_#{attr_s}" do |*params|
         unless (1..2).include? params.length
