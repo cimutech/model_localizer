@@ -4,7 +4,7 @@ module ModelLocalizer
     @@orm = "active_record"
 
     def configure(*localizer_cnames)
-      return if !sanity_check(localizer_cnames)
+      return if !class_check(localizer_cnames)
       yield self if block_given?
     end
 
