@@ -31,6 +31,17 @@ describe "localizer" do
       user.name.should == 'Leo'
     end
 
+    it "localizer will not insert into database before save the model" do
+      user.set_name("ole", "zh-CN")
+      Localizer.count.should == 1
+    end
+
+    it "localizer will insert into database before save the model" do
+      user.set_name("ole", "zh-CN")
+      user.save
+      Localizer.count.should == 2
+    end
+
   end
 
   describe "localizer with specific model" do

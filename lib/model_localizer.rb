@@ -16,6 +16,13 @@ module ModelLocalizer
     localizer_table_name = localizer_class_name.tableize.gsub(/\//, "_")
     localizer_class = class_check(localizer_class_name)
 
+
+    class_eval <<-RUBY, __FILE__, __LINE__+1
+      def localizer_list
+        @localizer_list ||= {}
+      end
+    RUBY
+
     attributes.each do |attribute|
       attr_s = attribute.to_s
       attrs_s = ActiveSupport::Inflector.pluralize(attr_s)
@@ -28,10 +35,8 @@ module ModelLocalizer
         end
         value = params[0]
         locale = params[1] || I18n.default_locale.to_s
-        localized_value = send("#{attrs_s}").where(column_name: attr_s, locale: locale.to_s).first
-        localized_value ||= send("#{attrs_s}").build(column_name: attr_s, locale: locale.to_s)
-        localized_value.value = value
-        localized_value.save
+        localizer_list["#{attr_s}"] ||= {}
+        localizer_list["#{attr_s}"]["#{locale}"] = value
       end
 
       define_method "get_#{attr_s}" do |*params|
@@ -40,9 +45,12 @@ module ModelLocalizer
         end
 
         locale = params[0] || I18n.default_locale.to_s
+        localizer_list["#{attr_s}"] ||= {}
+
+        return localizer_list["#{attr_s}"]["#{locale}"] if localizer_list["#{attr_s}"]["#{locale}"]
 
         localized_value = localizer_class.where(localizable_id: self.id, localizable_type: self.class.name, column_name: attr_s, locale: locale.to_s).first
-        return localized_value.value unless localized_value.nil?
+        return localizer_list["#{attr_s}"]["#{locale}"] = localized_value.value unless localized_value.nil?
         send("get_#{attr_s}") if localized_value.nil? and locale.to_s != I18n.default_locale.to_s
       end
 
@@ -58,7 +66,7 @@ module ModelLocalizer
       end
 
       ModelLocalizer.locales.each do |locale|
-        func_tail = locale.to_s.sub('-', '_').downcase
+        func_tail = locale_to_tail(locale)
         define_method "#{attr_s}_#{func_tail}" do
           send("get_#{attr_s}", locale)
         end
@@ -69,24 +77,21 @@ module ModelLocalizer
           send("set_#{attr_s}", params[0], locale)
         end
       end
+    end
 
+    before_save :localize_all_attributes
+
+    define_method "localize_all_attributes" do
+      localizer_list.each do |column_name, locale_data|
+        locale_data.each do |locale, value|
+          attrs_s = ActiveSupport::Inflector.pluralize(column_name)
+          localized_value = send("#{attrs_s}").where(column_name: column_name, locale: locale).first_or_create
+          localized_value.value = value
+          send("#{attrs_s}") << localized_value
+        end
+      end
     end
   end
-
-  # def validates_default_locale(*attributes)
-  #   attributes.each do |attribute|
-  #     attr_s = attribute.to_s
-  #     attrs_s = ActiveSupport::Inflector.pluralize(attr_s)
-
-  #     validates_each "#{attrs_s}".to_sym do |model, attr, value|
-  #       valid = false
-  #       value.each do |ls|
-  #         valid = true if ls.locale == I18n.default_locale.to_s and !ls.value.empty?
-  #       end
-  #       model.errors.add(attr, "is missing a value for the default locale (#{I18n.default_locale})") unless valid
-  #     end
-  #   end
-  # end
 
   private
 
@@ -100,6 +105,10 @@ module ModelLocalizer
 
   def localizer_table_missing?(localizer_class)
     localizer_class.connected? && !localizer_class.table_exists?
+  end
+
+  def locale_to_tail(locale)
+    locale.to_s.sub('-', '_').downcase
   end
 
 end

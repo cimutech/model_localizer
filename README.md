@@ -82,6 +82,10 @@ end
   user.name_en # => 'leo'
   user.name_en = 'kate' # => 'kate'
 
+  # use setter and getter
+  user.set_name("Leo", "en")
+  user.get_name("en") # => 'Leo'
+
   # use ransack for search
   q = {names_value_cont: 'kate'}
   User.ransack(q).result
